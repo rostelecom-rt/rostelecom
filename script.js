@@ -1,7 +1,7 @@
 let currentIndex = 0;
 const cards = document.querySelectorAll('.tariff');
 
-// Функции для переключения тарифов
+// Функции для переключения тарифов (без изменений)
 function showCard(index) {
     const isMobile = window.innerWidth <= 768;
     const cardsToShow = isMobile ? 1 : 3;
@@ -39,31 +39,30 @@ function selectTariff(tariff, discount, description, isMainTariff = true) {
     if (isMainTariff) {
         mainTariffInput.value = `${tariff} - ${discount} (${description})`;
         
-        const currentValue = tariffInput.value;
-        if (currentValue.includes("Видеонаблюдение")) {
-            tariffInput.value = `${tariff} - ${discount} (${description}) + Видеонаблюдение`;
+        // Обновляем поле с услугами
+        if (tariffInput.value.includes("Видеонаблюдение")) {
+            tariffInput.value = `${mainTariffInput.value} + Видеонаблюдение`;
         } else {
-            tariffInput.value = `${tariff} - ${discount} (${description})`;
+            tariffInput.value = mainTariffInput.value;
         }
     } else {
-        const mainTariff = mainTariffInput.value;
-        if (!mainTariff) {
-            alert("Пожалуйста, сначала выберите основной тариф!");
+        // Блокировка выбора только видеонаблюдения
+        if (!mainTariffInput.value) {
+            alert("Для добавления видеонаблюдения сначала выберите основной тариф!");
             return;
         }
-        tariffInput.value = `${mainTariff} + ${tariff} - ${discount} (${description})`;
+        tariffInput.value = `${mainTariffInput.value} + ${tariff} - ${discount} (${description})`;
     }
 
     if (window.innerWidth <= 768) {
-        const formSection = document.getElementById("application-form");
-        formSection.scrollIntoView({
+        document.getElementById("application-form").scrollIntoView({
             behavior: "smooth",
             block: "start"
         });
     }
 }
 
-// Основная функция отправки формы
+// Функция отправки формы (полная версия)
 async function submitForm(event) {
     event.preventDefault();
     
@@ -71,22 +70,21 @@ async function submitForm(event) {
     const submitBtn = form.querySelector('button[type="submit"]');
     const phoneInput = document.getElementById("phone");
     const mainTariff = document.getElementById("main-tariff").value;
-    const tariffInput = document.getElementById("tariff").value;
     
-    // Проверка основного тарифа
-    if (!mainTariff && tariffInput.includes("Видеонаблюдение")) {
+    // Жёсткая проверка основного тарифа
+    if (!mainTariff) {
         alert('Пожалуйста, выберите основной тариф!');
         return false;
     }
     
     // Валидация телефона
     if (!/^[\d\+]{10,15}$/.test(phoneInput.value)) {
-        alert('Пожалуйста, введите корректный номер телефона (минимум 10 цифр)');
+        alert('Некорректный номер телефона. Введите минимум 10 цифр.');
         phoneInput.focus();
         return false;
     }
 
-    // Блокируем кнопку отправки
+    // Блокировка кнопки
     if (submitBtn) {
         submitBtn.disabled = true;
         submitBtn.textContent = 'Отправка...';
@@ -94,19 +92,27 @@ async function submitForm(event) {
 
     const formData = {
         tariff: document.getElementById("tariff").value,
-        main_tariff: document.getElementById("main-tariff").value,
+        main_tariff: mainTariff,
         address: document.getElementById("address").value,
         name: document.getElementById("name").value,
-        phone: document.getElementById("phone").value,
+        phone: phoneInput.value,
         date: new Date().toLocaleString()
     };
 
-    // Отправка через GAS
+    // Отправка через GAS (с реальным URL)
     try {
-        await sendToGoogleAppsScript(formData);
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbxVXWpL5p0Bt9-pEzcTUcnybKa1eKzcLMfSK_te4zFV3UhY-krE0G0-XO_4g9s1IENybw/exec";
+        
+        const response = await fetch(GAS_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(formData)
+        });
+        
+        if (!response.ok) throw new Error("Ошибка сервера");
         showSuccess();
     } catch (error) {
-        console.error("Ошибка отправки:", error);
+        console.error("Ошибка:", error);
         showError();
     } finally {
         if (submitBtn) {
@@ -116,29 +122,7 @@ async function submitForm(event) {
     }
 }
 
-// Отправка в Google Apps Script
-async function sendToGoogleAppsScript(formData) {
-    const GAS_URL = "https://script.google.com/macros/s/AKfycbxVXWpL5p0Bt9-pEzcTUcnybKa1eKzcLMfSK_te4zFV3UhY-krE0G0-XO_4g9s1IENybw/exec";
-    
-    try {
-        const response = await fetch(GAS_URL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(formData)
-        });
-        
-        // Всегда считаем успехом, если ответ получен
-        if (!response.ok) {
-            throw new Error("Ошибка сервера");
-        }
-    } catch (error) {
-        console.error("Ошибка GAS:", error);
-        throw error;
-    }
-}
-
+// Остальные функции без изменений
 function showSuccess() {
     const modal = document.getElementById('successModal');
     if (modal) {
@@ -151,27 +135,18 @@ function showSuccess() {
 }
 
 function showError() {
-    alert("Не удалось отправить заявку автоматически. Пожалуйста, позвоните нам напрямую по номеру +7 (991) 424-23-37");
+    alert("Ошибка соединения. Позвоните нам: +7 (991) 424-23-37");
 }
 
 function resetForm() {
-    document.getElementById("main-tariff").value = "";
-    document.getElementById("tariff").value = "";
+    // Сброс только полей формы, кроме выбранных услуг
     document.getElementById("address").value = "";
     document.getElementById("name").value = "";
     document.getElementById("phone").value = "";
-    
-    const submitBtn = document.querySelector('button[type="submit"]');
-    if (submitBtn) {
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'Подключить';
-    }
 }
 
-// Закрытие модального окна
 document.querySelector('.close').addEventListener('click', () => {
     document.getElementById('successModal').style.display = 'none';
 });
 
-// Инициализация
 showCard(currentIndex);
