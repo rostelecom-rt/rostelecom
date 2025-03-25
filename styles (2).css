@@ -1,0 +1,441 @@
+body {
+    font-family: 'Roboto', Arial, sans-serif;
+    background: linear-gradient(135deg, #f4f4f4, #e0e0e0);
+    margin: 0;
+    padding: 0;
+    color: #333;
+}
+
+header {
+    font-family: 'Roboto', Arial, sans-serif;
+    background: linear-gradient(135deg, #6a1b9a, #4a148c);
+    color: #ffffff;
+    padding: 20px;
+    text-align: center;
+    position: relative;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.region-info {
+    font-family: 'Roboto', Arial, sans-serif;
+    font-size: 18px;
+    font-weight: 500;
+    color: #ffffff;
+    margin-top: 10px;
+    text-align: center;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.sales-phone-header {
+    font-family: 'Roboto', Arial, sans-serif;
+    font-size: 18px;
+    font-weight: 500;
+    margin-top: 10px;
+    text-align: center;
+    color: #ffcc00;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.phone-number-header {
+    font-family: 'Roboto', Arial, sans-serif;
+    font-size: 20px;
+    font-weight: bold;
+    text-align: center;
+    margin-top: 5px;
+}
+
+.phone-number-header a {
+    color: #ffffff;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.phone-number-header a:hover {
+    color: #ff5722;
+}
+
+.logo {
+    display: none;
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    width: 100px;
+    height: auto;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+.tariffs-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    padding: 20px;
+}
+
+.tariffs {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 80%;
+    overflow: hidden;
+    position: relative;
+    gap: 20px;
+}
+
+.tariff {
+    background: linear-gradient(135deg, #6a1b9a, #4a148c);
+    color: #ffffff;
+    border-radius: 10px;
+    padding: 20px;
+    width: 250px;
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin: 0 10px;
+    display: none;
+    opacity: 0;
+    transform: translateY(20px);
+    position: relative;
+}
+
+.tariff.active {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.tariff:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    background: linear-gradient(135deg, #4a148c, #6a1b9a);
+}
+
+.tariff h2 {
+    font-family: 'Roboto', Arial, sans-serif;
+    color: #ffffff;
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+
+.tariff p {
+    font-family: 'Roboto', Arial, sans-serif;
+    font-size: 16px;
+    margin: 5px 0;
+    color: #f0f0f0;
+}
+
+.price {
+    font-family: 'Roboto', Arial, sans-serif;
+    font-size: 28px;
+    font-weight: bold;
+    color: #ff5722;
+    margin-top: 15px;
+}
+
+.old-price {
+    text-decoration: line-through;
+    color: #ccc;
+    margin-right: 10px;
+}
+
+.tariff-label {
+    text-align: center;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: #ffffff;
+    font-size: 18px;
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1;
+    white-space: nowrap;
+}
+
+.arrow {
+    cursor: pointer;
+    font-size: 40px;
+    background: linear-gradient(135deg, #ff5722, #e64a19);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    user-select: none;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    transition: opacity 0.3s ease;
+}
+
+.arrow:hover {
+    opacity: 0.8;
+}
+
+.left-arrow {
+    left: 10px;
+}
+
+.right-arrow {
+    right: 10px;
+}
+
+.application-form {
+    background: #ffffff;
+    padding: 20px;
+    margin: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 80px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.application-form:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.application-form h2 {
+    font-family: 'Roboto', Arial, sans-serif;
+    color: #6a1b9a;
+    margin-bottom: 10px;
+}
+
+.application-form p {
+    font-family: 'Roboto', Arial, sans-serif;
+    font-size: 16px;
+    margin-bottom: 20px;
+}
+
+.form-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-container label {
+    font-family: 'Roboto', Arial, sans-serif;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.form-container input {
+    font-family: 'Roboto', Arial, sans-serif;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    transition: border-color 0.3s ease;
+}
+
+.form-container input:focus {
+    border-color: #6a1b9a;
+}
+
+.form-container input[readonly] {
+    background-color: #f4f4f4;
+    cursor: not-allowed;
+}
+
+.form-container button {
+    font-family: 'Roboto', Arial, sans-serif;
+    padding: 10px;
+    background: linear-gradient(135deg, #ff5722, #e64a19);
+    color: #ffffff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.form-container button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+#submitBtn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+#phone:invalid {
+    border-color: #ff5722;
+}
+
+footer {
+    font-family: 'Roboto', Arial, sans-serif;
+    background: linear-gradient(135deg, #6a1b9a, #4a148c);
+    color: #ffffff;
+    text-align: center;
+    padding: 10px;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    z-index: 1000;
+    box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.2);
+}
+
+footer p {
+    margin: 5px 0;
+}
+
+.sales-phone {
+    font-size: 16px;
+}
+
+.sales-phone a {
+    color: #ffffff;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.sales-phone a:hover {
+    color: #ff5722;
+}
+
+.disclaimer {
+    font-size: 12px;
+    color: #ccc;
+    margin-top: 5px;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1001;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    max-width: 350px;
+    width: 90%;
+    animation: fadeIn 0.3s ease;
+    position: relative;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.modal-content .close {
+    cursor: pointer;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 20px;
+    color: #333;
+}
+
+.select-button {
+    font-family: 'Roboto', Arial, sans-serif;
+    padding: 10px;
+    background: linear-gradient(135deg, #ff5722, #e64a19);
+    color: #ffffff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    margin-top: 15px;
+    width: 100%;
+}
+
+.select-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.manager-info {
+    font-family: 'Roboto', Arial, sans-serif;
+    font-size: 16px;
+    color: #6a1b9a;
+    margin-top: 10px;
+    font-weight: 500;
+}
+
+@media (max-width: 768px) {
+    .tariff {
+        width: 100%;
+        margin: 0 0 20px 0;
+    }
+
+    .tariff.active {
+        display: block;
+    }
+
+    .tariffs {
+        width: 100%;
+        gap: 0;
+        position: relative;
+    }
+
+    .arrow {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 10;
+    }
+
+    .left-arrow {
+        left: 10px;
+    }
+
+    .right-arrow {
+        right: 10px;
+    }
+
+    .application-form {
+        margin-bottom: 100px;
+    }
+
+    footer {
+        position: relative;
+    }
+
+    .sales-phone {
+        font-size: 16px;
+    }
+
+    .phone-number {
+        font-size: 20px;
+    }
+}
+#submitBtn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+#phone:invalid {
+    border-color: #ff5722;
+    animation: shake 0.5s;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-5px); }
+    40%, 80% { transform: translateX(5px); }
+}
+
+.modal-content {
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
