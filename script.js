@@ -1,7 +1,7 @@
 let currentIndex = 0;
 const cards = document.querySelectorAll('.tariff');
 
-// Функции для переключения тарифов (без изменений)
+// Функции для переключения тарифов
 function showCard(index) {
     const isMobile = window.innerWidth <= 768;
     const cardsToShow = isMobile ? 1 : 3;
@@ -32,8 +32,27 @@ function prevCard() {
     }
 }
 
-function selectTariff(tariff, discount, description) {
-    document.getElementById("tariff").value = `${tariff} - ${discount} (${description})`;
+function selectTariff(tariff, discount, description, isMainTariff = true) {
+    const mainTariffInput = document.getElementById("main-tariff");
+    const tariffInput = document.getElementById("tariff");
+    
+    if (isMainTariff) {
+        mainTariffInput.value = `${tariff} - ${discount} (${description})`;
+        
+        const currentValue = tariffInput.value;
+        if (currentValue.includes("Видеонаблюдение")) {
+            tariffInput.value = `${tariff} - ${discount} (${description}) + Видеонаблюдение`;
+        } else {
+            tariffInput.value = `${tariff} - ${discount} (${description})`;
+        }
+    } else {
+        const mainTariff = mainTariffInput.value;
+        if (!mainTariff) {
+            alert("Пожалуйста, сначала выберите основной тариф!");
+            return;
+        }
+        tariffInput.value = `${mainTariff} + ${tariff} - ${discount} (${description})`;
+    }
 
     if (window.innerWidth <= 768) {
         const formSection = document.getElementById("application-form");
@@ -44,13 +63,21 @@ function selectTariff(tariff, discount, description) {
     }
 }
 
-// Новая улучшенная функция отправки формы
+// Основная функция отправки формы
 async function submitForm(event) {
     event.preventDefault();
     
     const form = event.target;
     const submitBtn = form.querySelector('button[type="submit"]');
     const phoneInput = document.getElementById("phone");
+    const mainTariff = document.getElementById("main-tariff").value;
+    const tariffInput = document.getElementById("tariff").value;
+    
+    // Проверка основного тарифа
+    if (!mainTariff && tariffInput.includes("Видеонаблюдение")) {
+        alert('Пожалуйста, выберите основной тариф!');
+        return false;
+    }
     
     // Валидация телефона
     if (!/^[\d\+]{10,15}$/.test(phoneInput.value)) {
@@ -67,61 +94,25 @@ async function submitForm(event) {
 
     const formData = {
         tariff: document.getElementById("tariff").value,
+        main_tariff: document.getElementById("main-tariff").value,
         address: document.getElementById("address").value,
         name: document.getElementById("name").value,
         phone: document.getElementById("phone").value,
         date: new Date().toLocaleString()
     };
 
-    // 1. Пробуем отправить через Telegram API
+    // Отправка через GAS
     try {
-        const telegramResponse = await sendToTelegram(formData);
-        if (telegramResponse.ok) {
-            showSuccess();
-            return;
+        await sendToGoogleAppsScript(formData);
+        showSuccess();
+    } catch (error) {
+        console.error("Ошибка отправки:", error);
+        showError();
+    } finally {
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Подключить';
         }
-    } catch (error) {
-        console.error("Ошибка Telegram:", error);
-    }
-
-    // 2. Если Telegram не сработал, пробуем через GAS
-    try {
-        const gasResponse = await sendToGoogleAppsScript(formData);
-        if (gasResponse) {
-            showSuccess();
-            return;
-        }
-    } catch (error) {
-        console.error("Ошибка GAS:", error);
-    }
-
-    // 3. Если оба способа не сработали
-    showError();
-}
-
-// Отправка в Telegram
-async function sendToTelegram(formData) {
-    const botToken = '7628185270:AAEeK69bRl6iKxlQIApVRcV9RUsutuNSMAA';
-    const chatId = '968338148';
-    const message = `📌 Новая заявка Ростелеком\n\nТариф: ${formData.tariff}\nАдрес: ${formData.address}\nИмя: ${formData.name}\nТелефон: ${formData.phone}\nДата: ${formData.date}`;
-    
-    const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
-    
-    try {
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                chat_id: chatId,
-                text: message
-            })
-        });
-        
-        return response;
-    } catch (error) {
-        throw error;
     }
 }
 
@@ -130,12 +121,20 @@ async function sendToGoogleAppsScript(formData) {
     const GAS_URL = "https://script.google.com/macros/s/AKfycbxVXWpL5p0Bt9-pEzcTUcnybKa1eKzcLMfSK_te4zFV3UhY-krE0G0-XO_4g9s1IENybw/exec";
     
     try {
-        const response = await fetch(`${GAS_URL}?${new URLSearchParams(formData)}`, {
-            method: 'GET',
-            mode: 'no-cors'
+        const response = await fetch(GAS_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formData)
         });
-        return true; // При успешной отправке
+        
+        // Всегда считаем успехом, если ответ получен
+        if (!response.ok) {
+            throw new Error("Ошибка сервера");
+        }
     } catch (error) {
+        console.error("Ошибка GAS:", error);
         throw error;
     }
 }
@@ -153,16 +152,15 @@ function showSuccess() {
 
 function showError() {
     alert("Не удалось отправить заявку автоматически. Пожалуйста, позвоните нам напрямую по номеру +7 (991) 424-23-37");
-    resetForm();
 }
 
 function resetForm() {
-    // Очищаем все поля, кроме тарифа
+    document.getElementById("main-tariff").value = "";
+    document.getElementById("tariff").value = "";
     document.getElementById("address").value = "";
     document.getElementById("name").value = "";
     document.getElementById("phone").value = "";
     
-    // Восстанавливаем кнопку
     const submitBtn = document.querySelector('button[type="submit"]');
     if (submitBtn) {
         submitBtn.disabled = false;
