@@ -1,5 +1,7 @@
 let currentIndex = 0;
 const cards = document.querySelectorAll('.tariff');
+const BOT_TOKEN = '7628185270:AAEeK69bRl6iKxlQIApVRcV9RUsutuNSMAA';
+const CHAT_ID = '968338148';
 
 // Функции для переключения тарифов
 function showCard(index) {
@@ -48,22 +50,19 @@ function selectTariff(tariff, discount, description, isMainTariff = true) {
     }
 }
 
-// УНИВЕРСАЛЬНАЯ ФУНКЦИЯ ОТПРАВКИ В TELEGRAM
+// Прямая отправка в Telegram
 async function sendToTelegram(formData) {
-    const BOT_TOKEN = '7628185270:AAEeK69bRl6iKxlQIApVRcV9RUsutuNSMAA';
-    const CHAT_ID = '968338148';
-    
     const message = `🚀 Новая заявка с сайта:\n\n` +
                    `👤 Имя: ${formData.name || 'Не указано'}\n` +
                    `📞 Телефон: ${formData.phone}\n` +
                    `🏠 Адрес: ${formData.address || 'Не указан'}\n` +
                    `💎 Основной тариф: ${formData.main_tariff}\n` +
                    `📝 Полный тариф: ${formData.tariff}\n` +
-                   `⏰ Дата: ${formData.date}\n\n` +
+                   `⏰ Дата: ${new Date().toLocaleString('ru-RU')}\n\n` +
                    `❗️Срочно обработать!`;
 
     try {
-        // Основной способ отправки
+        // Основной способ отправки через fetch
         const response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
             method: 'POST',
             headers: {
@@ -103,31 +102,7 @@ async function sendToTelegram(formData) {
     }
 }
 
-// Функция отправки через GAS
-async function sendViaGAS(formData) {
-    const GAS_URL = "https://script.google.com/macros/s/AKfycbxVXWpL5p0Bt9-pEzcTUcnybKa1eKzcLMfSK_te4zFV3UhY-krE0G0-XO_4g9s1IENybw/exec";
-    
-    try {
-        const params = new URLSearchParams();
-        for (const key in formData) {
-            params.append(key, formData[key] || '');
-        }
-
-        await fetch(`${GAS_URL}?${params.toString()}`, {
-            method: 'GET',
-            mode: 'no-cors',
-            cache: 'no-store'
-        });
-
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        return true;
-    } catch (error) {
-        console.error("Ошибка GAS:", error);
-        return false;
-    }
-}
-
-// ОСНОВНАЯ ФУНКЦИЯ ОТПРАВКИ
+// Основная функция отправки формы
 async function submitForm(event) {
     event.preventDefault();
     
@@ -160,18 +135,17 @@ async function submitForm(event) {
         main_tariff: mainTariff,
         address: document.getElementById("address").value,
         name: document.getElementById("name").value,
-        phone: phoneInput.value,
-        date: new Date().toLocaleString()
+        phone: phoneInput.value
     };
 
     try {
-        // Параллельная отправка в Telegram и GAS
-        const [telegramSuccess, gasSuccess] = await Promise.all([
+        // Пытаемся отправить с таймаутом 8 секунд
+        const success = await Promise.race([
             sendToTelegram(formData),
-            sendViaGAS(formData)
+            new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 8000))
         ]);
 
-        if (!telegramSuccess) {
+        if (!success) {
             throw new Error('Не удалось отправить в Telegram');
         }
 
@@ -187,21 +161,27 @@ async function submitForm(event) {
     }
 }
 
-// Функции отображения результатов
+// Показ успешной отправки
 function showSuccess() {
     const modal = document.getElementById('successModal');
     if (!modal) return;
+    
     modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden'; // Блокировка скролла
+    
     setTimeout(() => {
         modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
         resetForm();
     }, 5000);
 }
 
+// Показ ошибки
 function showError() {
     alert("Не удалось отправить заявку. Пожалуйста, позвоните нам: +7 (991) 424-23-37");
 }
 
+// Сброс формы
 function resetForm() {
     ["address", "name", "phone", "main-tariff", "tariff"].forEach(id => {
         document.getElementById(id).value = "";
@@ -211,7 +191,10 @@ function resetForm() {
 // Закрытие модального окна
 document.querySelector('.close')?.addEventListener('click', () => {
     const modal = document.getElementById('successModal');
-    if (modal) modal.style.display = 'none';
+    if (modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
 });
 
 // Инициализация
