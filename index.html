@@ -68,6 +68,18 @@
                     <p>Скидка 50% на первые 60 дней!</p>
                     <button class="select-button" onclick="selectTariff('Домашний интернет', 'Первые 60 дней скидка 50%, далее 600₽', 'Технологии доступа. Хит сезона S')">Выбрать</button>
                 </div>
+
+                <!-- Видеонаблюдение -->
+                <div class="tariff" data-index="4">
+                    <h2>Видеонаблюдение</h2>
+                    <p>(Дополнительно к тарифу)</p>
+                    <p>Просмотр записи в Онлайн режиме через приложение</p>
+                    <p>Видеозапись в качестве FullHD</p>
+                    <p>Угол обзора камеры до 110° градусов</p>
+                    <p>Сохранение записи в облачное хранилище</p>
+                    <p class="price"><span class="old-price">490₽</span> 390₽</p>
+                    <button class="select-button" onclick="selectTariff('Видеонаблюдение', 'Цена 390₽', 'Дополнительно к тарифу', false)">Выбрать</button>
+                </div>
             </div>
             <div class="arrow right-arrow" onclick="nextCard()">&#10095;</div>
         </section>
@@ -75,17 +87,18 @@
         <section class="application-form" id="application-form">
             <h2>Отправьте заявку</h2>
             <p>Наш специалист свяжется с Вами в ближайшее время.</p>
-           <form class="form-container" id="applicationForm" onsubmit="submitForm(event)">
-    <label for="tariff">Выбранный тариф:</label>
-    <input type="text" id="tariff" name="tariff" readonly required>
-    <label for="address">Населенный пункт, улица, дом, квартира (если есть):</label>
-    <input type="text" id="address" name="address" required>
-    <label for="name">Как Вас зовут?</label>
-    <input type="text" id="name" name="name" required>
-    <label for="phone">Мобильный телефон:</label>
-    <input type="tel" id="phone" name="phone" pattern="[\d\+]{10,15}" title="Введите номер телефона (минимум 10 цифр)" required>
-    <button type="submit" id="submitBtn">Подключить</button>
-</form>
+            <form class="form-container" id="applicationForm" onsubmit="submitForm(event)">
+                <input type="hidden" id="main-tariff" name="main-tariff">
+                <label for="tariff">Выбранные услуги:</label>
+                <input type="text" id="tariff" name="tariff" readonly required>
+                <label for="address">Населенный пункт, улица, дом, квартира (если есть):</label>
+                <input type="text" id="address" name="address" required>
+                <label for="name">Как Вас зовут?</label>
+                <input type="text" id="name" name="name" required>
+                <label for="phone">Мобильный телефон:</label>
+                <input type="tel" id="phone" name="phone" pattern="[\d\+]{10,15}" title="Введите номер телефона (минимум 10 цифр)" required>
+                <button type="submit" id="submitBtn">Подключить</button>
+            </form>
         </section>
     </main>
 
@@ -104,4 +117,4 @@
     </footer>
     <script src="script.js"></script>
 </body>
-</html>
+    </html>
