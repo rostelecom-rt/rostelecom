@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ростелеком | Чат с Михаилом</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        :root {
+            --rt-purple: #7722FF;
+            --rt-purple-dark: #5511CC;
+            --rt-orange: #FF4F12;
+            --rt-gradient: linear-gradient(135deg, #7722FF 0%, #AD22FF 100%);
+        }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: #f0f2f5; 
+            background-image: radial-gradient(#d1d5db 0.5px, transparent 0.5px);
+            background-size: 24px 24px;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .glass-header {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        .message-anim { 
+            animation: messageSlide 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards; 
+            opacity: 0;
+        }
+        @keyframes messageSlide {
+            from { opacity: 0; transform: translateY(20px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .bot-bubble {
+            background: white;
+            border-bottom-left-radius: 4px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+        .user-bubble {
+            background: var(--rt-gradient);
+            border-bottom-right-radius: 4px;
+            box-shadow: 0 8px 20px rgba(119, 34, 255, 0.2);
+        }
+        .typing-dot {
+            width: 6px; height: 6px; background: #94a3b8; border-radius: 50%;
+            animation: bounce 1.4s infinite ease-in-out;
+        }
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0.3); opacity: 0.4; }
+            40% { transform: scale(1); opacity: 1; }
+        }
+        .custom-scrollbar::-webkit-scrollbar { width: 5px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    </style>
+</head>
+<body class="overflow-hidden">
+    <nav class="glass-header border-b border-slate-200 px-4 py-3 flex items-center justify-between shadow-sm sticky top-0 z-50">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-white rounded-xl shadow-inner border border-slate-100 flex items-center justify-center p-1.5">
+                <img src="logo.png" class="w-full h-full object-contain" alt="Логотип">
+            </div>
+            <div>
+                <span class="font-bold text-base tracking-tight text-slate-800 leading-none block">Ростелеком</span>
+                <span class="text-[10px] text-green-600 font-bold uppercase tracking-widest mt-0.5 block">VIP-канал связи</span>
+            </div>
+        </div>
+        <div class="flex items-center gap-3">
+            <div class="text-right hidden sm:block">
+                <p class="text-xs font-bold text-slate-700 leading-none">Михаил</p>
+                <p class="text-[10px] text-slate-400 font-medium mt-1 italic">Подбирает тариф...</p>
+            </div>
+            <div class="relative">
+                <div class="w-11 h-11 rounded-full border-2 border-rt-purple p-0.5 shadow-md">
+                    <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=200&auto=format&fit=crop" class="w-full h-full rounded-full object-cover" alt="Михаил">
+                </div>
+                <span class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></span>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-grow flex flex-col max-w-2xl mx-auto w-full px-4 overflow-hidden relative">
+        <div id="quick-benefits" class="mt-4 grid grid-cols-2 gap-2 mb-4">
+            <div class="benefit-card bg-white p-3 rounded-xl border border-slate-100 shadow-sm flex items-center gap-2">
+                <div class="bg-purple-50 p-1.5 rounded-lg text-rt-purple"><i data-lucide="clock" class="w-4 h-4"></i></div>
+                <span class="text-[11px] font-bold text-slate-600">Индивидуальный подбор</span>
+            </div>
+            <div class="benefit-card bg-white p-3 rounded-xl border border-slate-100 shadow-sm flex items-center gap-2">
+                <div class="bg-orange-50 p-1.5 rounded-lg text-rt-orange"><i data-lucide="gift" class="w-4 h-4"></i></div>
+                <span class="text-[11px] font-bold text-slate-600">Бонусы новым клиентам</span>
+            </div>
+        </div>
+
+        <div id="chat-window" class="flex-grow overflow-y-auto space-y-6 pb-24 pt-2 pr-2 custom-scrollbar"></div>
+
+        <div id="typing-indicator" class="hidden flex items-center gap-2 mb-6 ml-2">
+            <div class="bg-white px-5 py-3 rounded-2xl shadow-sm border border-slate-100 flex gap-2">
+                <div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>
+            </div>
+        </div>
+
+        <div class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-[#f0f2f5] via-[#f0f2f5] to-transparent">
+            <form id="chat-form" class="relative flex items-center gap-2">
+                <input type="text" id="user-input" autocomplete="off" 
+                    class="flex-grow bg-white border-2 border-slate-200 rounded-2xl px-6 py-5 focus:border-rt-purple focus:ring-4 focus:ring-purple-50 outline-none shadow-xl transition-all text-slate-700 font-medium placeholder:text-slate-400" 
+                    placeholder="Напишите здесь...">
+                <button type="submit" 
+                    class="bg-sky-500/90 hover:bg-sky-600 text-white p-4 rounded-2xl hover:scale-105 active:scale-95 transition-all shadow-lg shadow-sky-500/30 flex items-center justify-center border border-white/20 backdrop-blur-sm">
+                    <i data-lucide="send" class="w-6 h-6 text-white drop-shadow-sm"></i>
+                    <span class="ml-2 font-bold hidden sm:inline text-white drop-shadow-sm">Отправить</span>
+                </button>
+            </form>
+            <div class="flex items-center justify-center gap-2 mt-3 opacity-60">
+                <i data-lucide="shield-check" class="w-3 h-3 text-slate-500"></i>
+                <span class="text-[9px] uppercase tracking-[0.2em] font-bold text-slate-500">Данные зашифрованы по стандарту AES-256</span>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        lucide.createIcons();
+        const chatWindow = document.getElementById('chat-window');
+        const chatForm = document.getElementById('chat-form');
+        const userInput = document.getElementById('user-input');
+        const typingIndicator = document.getElementById('typing-indicator');
+
+        const userData = { name: '', address: '', phone: '' };
+        let currentStep = 0;
+
+        const steps = [
+            { question: "Приветствую! 👋 Меня зовут Михаил, я эксперт по подключению Ростелеком. Сегодня отличный день для подключения!", field: 'greeting' },
+            { question: "Чтобы я подобрал для вас тариф с максимальной выгодой, ответьте на 3 коротких вопроса. Это займет меньше минуты. Готовы? <br><br><b>Как мне лучше к вам обращаться?</b>", field: 'name' },
+            { question: "Приятно познакомиться, {name}! 🤝 Напишите ваш адрес (город, улица, дом). Я проверю, какие тарифы и технологии подключения доступны в вашем доме.", field: 'address' },
+            { question: "Спасибо! Оставьте ваш номер телефона, я перезвоню вам в течение 15 минут, чтобы обсудить детали подключения и вашу персональную скидку!", field: 'phone' },
+            { question: "Ура! 🎉 Заявка принята. Я уже формирую список лучших предложений для вас. Ждите звонка с номера +7(991)424-23-37, я на связи!", field: 'done' }
+        ];
+
+        function addMessage(text, isBot = true) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `flex ${isBot ? 'justify-start' : 'justify-end'} message-anim mb-4`;
+            const contentClass = isBot ? 'bot-bubble text-slate-700 border border-slate-100 rounded-2xl rounded-tl-none' : 'user-bubble text-white rounded-2xl rounded-tr-none';
+            messageDiv.innerHTML = `<div class="max-w-[88%] px-5 py-4 ${contentClass}"><p class="text-sm md:text-base leading-relaxed font-medium">${text}</p><div class="flex items-center justify-end gap-1 mt-2 opacity-50"><span class="text-[10px] font-bold">${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>${!isBot ? '<i data-lucide="check-check" class="w-3 h-3"></i>' : ''}</div></div>`;
+            chatWindow.appendChild(messageDiv);
+            if (!isBot) lucide.createIcons();
+            chatWindow.scrollTo({ top: chatWindow.scrollHeight, behavior: 'smooth' });
+        }
+
+        async function botAsk() {
+            if (currentStep < steps.length) {
+                typingIndicator.classList.remove('hidden');
+                chatWindow.scrollTo({ top: chatWindow.scrollHeight, behavior: 'smooth' });
+                const delay = Math.min(Math.max(steps[currentStep].question.length * 15, 1000), 3000);
+                await new Promise(r => setTimeout(r, delay));
+                typingIndicator.classList.add('hidden');
+                let text = steps[currentStep].question.replace('{name}', userData.name || '');
+                addMessage(text);
+                if (steps[currentStep].field === 'greeting') { currentStep++; botAsk(); return; }
+                if (steps[currentStep].field === 'done') {
+                    confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#7722FF', '#FF4F12', '#ffffff'] });
+                    sendToGoogle();
+                    userInput.disabled = true;
+                    userInput.placeholder = "Диалог успешно завершен";
+                }
+            }
+        }
+
+        function sendToGoogle() {
+            const url = `https://docs.google.com/forms/d/e/1FAIpQLSe-P7z4ysbO75kTrBFRr0l4PsTv1STzAfetqRyvdFkyVetCRQ/formResponse?entry.1533723519=${encodeURIComponent(userData.name)}&entry.2057814462=${encodeURIComponent(userData.address)}&entry.629779220=${encodeURIComponent(userData.phone)}&submit=Submit`;
+            const iframe = document.createElement('iframe');
+            iframe.style.display = 'none';
+            document.body.appendChild(iframe);
+            iframe.src = url;
+            setTimeout(() => { if(iframe.parentNode) document.body.removeChild(iframe); }, 2000);
+        }
+
+        chatForm.onsubmit = (e) => {
+            e.preventDefault();
+            const text = userInput.value.trim();
+            if (!text || currentStep >= steps.length - 1) return;
+            addMessage(text, false);
+            userData[steps[currentStep].field] = text;
+            userInput.value = '';
+            currentStep++;
+            botAsk();
+            document.getElementById('quick-benefits').style.opacity = '0.5';
+        };
+        setTimeout(botAsk, 500);
+    </script>
+</body>
+</html>
